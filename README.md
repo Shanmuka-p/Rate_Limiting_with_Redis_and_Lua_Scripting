@@ -54,7 +54,7 @@ Build and launch the Spring Boot application using the provided local Maven wrap
 .maven/apache-maven-3.9.6/bin/mvn.cmd spring-boot:run
 ```
 
-The application will start on port `8080` (e.g., `http://localhost:8080`).
+The application will start on port `8085` (e.g., `http://localhost:8085`).
 
 ---
 
@@ -68,7 +68,7 @@ Simulates a protected resource. Requires the `X-API-Key` header. Returns `200 OK
 - **Headers**: `X-API-Key: <your-api-key>`
 - **Example request**:
   ```bash
-  curl -X POST -H "X-API-Key: client-123" http://localhost:8080/api/data
+  curl -X POST -H "X-API-Key: client-123" http://localhost:8085/api/data
   ```
 - **Example Response (200 OK)**:
   ```json
@@ -106,7 +106,7 @@ Allows dynamically configuring custom rate limits for individual API keys. Confi
   ```
 - **Example request**:
   ```bash
-  curl -X POST -H "Content-Type: application/json" -d "{\"apiKey\": \"client-123\", \"requestsPerMinute\": 15}" http://localhost:8080/api/rate-limit/configure
+  curl -X POST -H "Content-Type: application/json" -d "{\"apiKey\": \"client-123\", \"requestsPerMinute\": 15}" http://localhost:8085/api/rate-limit/configure
   ```
 - **Example Response**:
   ```json
@@ -127,7 +127,7 @@ Queries Redis to calculate the current request count, remaining requests, and th
 - **Method**: `GET`
 - **Example request**:
   ```bash
-  curl http://localhost:8080/api/rate-limit/status/client-123
+  curl http://localhost:8085/api/rate-limit/status/client-123
   ```
 - **Example Response**:
   ```json
@@ -147,7 +147,7 @@ Manually clears the request log and configuration for a specific API key from Re
 - **Method**: `DELETE`
 - **Example request**:
   ```bash
-  curl -X DELETE http://localhost:8080/api/rate-limit/reset/client-123
+  curl -X DELETE http://localhost:8085/api/rate-limit/reset/client-123
   ```
 - **Example Response**:
   ```json
