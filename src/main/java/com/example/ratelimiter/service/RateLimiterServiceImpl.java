@@ -72,41 +72,30 @@ public class RateLimiterServiceImpl implements RateLimiterService {
     public void resetLimit(String apiKey) {
         String logKey = LOG_KEY_PREFIX + apiKey;
         redisTemplate.delete(logKey);
-        redisTemplate.opsForHash().delete(CONFIG_HASH_KEY, apiKey);
-        log.info("Reset rate limit logs and configurations for apiKey: {}", apiKey);
+        log.info("Reset rate limit logs for apiKey: {}", apiKey);
     }
 
     private int getLimitForApiKey(String apiKey) {
-        try {
-            String limitStr = (String) redisTemplate.opsForHash().get(CONFIG_HASH_KEY, apiKey);
-            if (limitStr != null) {
-                return Integer.parseInt(limitStr);
-            }
-        } catch (Exception e) {
-            log.error("Failed to fetch limit from Redis for apiKey: {}. Using default.", apiKey, e);
+        String limitStr = (String) redisTemplate.opsForHash().get(CONFIG_HASH_KEY, apiKey);
+        if (limitStr != null) {
+            return Integer.parseInt(limitStr);
         }
         return DEFAULT_LIMIT;
     }
 
     private RateLimitStatusDto calculateStatus(String apiKey, String logKey, int limit, long currentTime) {
-        Long currentCount = 0L;
+        Long currentCount = redisTemplate.opsForZSet().zCard(logKey);
+        if (currentCount == null) {
+            currentCount = 0L;
+        }
+
         long resetTime = currentTime + WINDOW_SIZE_MS;
-
-        try {
-            currentCount = redisTemplate.opsForZSet().zCard(logKey);
-            if (currentCount == null) {
-                currentCount = 0L;
+        Set<TypedTuple<String>> range = redisTemplate.opsForZSet().rangeWithScores(logKey, 0, 0);
+        if (range != null && !range.isEmpty()) {
+            Double score = range.iterator().next().getScore();
+            if (score != null) {
+                resetTime = score.longValue() + WINDOW_SIZE_MS;
             }
-
-            Set<TypedTuple<String>> range = redisTemplate.opsForZSet().rangeWithScores(logKey, 0, 0);
-            if (range != null && !range.isEmpty()) {
-                Double score = range.iterator().next().getScore();
-                if (score != null) {
-                    resetTime = score.longValue() + WINDOW_SIZE_MS;
-                }
-            }
-        } catch (Exception e) {
-            log.error("Error calculating rate limit status for apiKey: {}", apiKey, e);
         }
 
         int remaining = Math.max(0, limit - currentCount.intValue());
