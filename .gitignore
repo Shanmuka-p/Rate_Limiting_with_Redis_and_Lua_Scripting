@@ -1,0 +1,25 @@
+# Maven build directory
+target/
+
+# Local Maven wrapper/dist directory
+.maven/
+
+# Compiled class file
+*.class
+
+# Log files
+*.log
+
+# Package Files
+*.jar
+*.war
+*.ear
+
+# IDEs and editors
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+bin/
